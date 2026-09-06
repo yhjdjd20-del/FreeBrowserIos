@@ -5,20 +5,38 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-15
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare and build with iosbox
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}:/project" \
-            mobaiapp/iosbox:latest \
-            iosbox dev /project
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
 
-      - name: Upload IPA
+      - name: Build iOS App
+        run: |
+          xcodebuild clean build \
+            -project BrowserX.xcodeproj \
+            -scheme BrowserX \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath ./build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            ENTITLEMENTS_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" 
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir Payload
+          # Берем .app из явно указанной папки ./build
+          cp -R ./build/Build/Products/Release-iphoneos/BrowserX.app Payload/
+          zip -q -r BrowserX-Unsigned.ipa Payload
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: BrowserX-Unsigned-IPA
-          path: /project/build/iosbox/BrowserX.ipa
+          path: BrowserX-Unsigned.ipa
