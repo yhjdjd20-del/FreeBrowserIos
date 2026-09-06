@@ -17,8 +17,8 @@ jobs:
       - name: Build iOS App
         run: |
           xcodebuild clean build \
-            -project BrowserX.xcodeproj \
-            -scheme BrowserX \
+            -project FreeBrowserIos.xcodeproj \
+            -scheme FreeBrowserIos \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
@@ -31,12 +31,11 @@ jobs:
       - name: Package unsigned IPA
         run: |
           mkdir Payload
-          # Берем .app из явно указанной папки ./build
-          cp -R ./build/Build/Products/Release-iphoneos/BrowserX.app Payload/
-          zip -q -r BrowserX-Unsigned.ipa Payload
+          cp -R ./build/Build/Products/Release-iphoneos/FreeBrowserIos.app Payload/
+          zip -q -r FreeBrowserIos-Unsigned.ipa Payload
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BrowserX-Unsigned-IPA
-          path: BrowserX-Unsigned.ipa
+          name: FreeBrowserIos-Unsigned-IPA
+          path: FreeBrowserIos-Unsigned.ipa
